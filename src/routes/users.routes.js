@@ -3,6 +3,6 @@ const router = express.Router();
 
 import usercontroller from "../controllers/user.controller.js";
 
-router.get("/", usercontroller.getUsers);
+router.get("/AllUsers", usercontroller.getUsers);
 
 export default router;
