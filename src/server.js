@@ -7,6 +7,7 @@ import db from "./config/db.js";
 import UserRoutes from "./routes/users.routes.js";
 import DishesRoutes from "./routes/dishes.routes.js";
 import tableRoutes from "./routes/tables.routes.js";
+import locationRoutes from "./routes/locations.routes.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 app.use("/api/users", UserRoutes);
 app.use("/api/dishes/", DishesRoutes);
 app.use("/api/tables/", tableRoutes);
+app.use("/api/locations/", locationRoutes);
 
 try{
     const connection = await db.getConnection();
