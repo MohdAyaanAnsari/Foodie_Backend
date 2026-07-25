@@ -16,7 +16,7 @@ const initializeDatabase = async () => {
         await createOrdersTable();
         await createOrderItemsTable();
 
-        console.log("🎉 Database initialized successfully");
+        // console.log("🎉 Database initialized successfully");
     } catch (err) {
         console.error("Database initialization failed");
         console.error(err);

@@ -1,6 +1,10 @@
 import db from "../config/db.js";
 
 const createLocationsTable = async () => {
+    const [tables] = await db.execute(`SHOW TABLES LIKE 'locations'`);
+
+    const tablesExist = tables.length >0;
+
     await db.execute(`
         CREATE TABLE IF NOT EXISTS locations (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -13,9 +17,10 @@ const createLocationsTable = async () => {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 ON UPDATE CURRENT_TIMESTAMP
         )
-    `).then(()=>{
+    `);
+    if(!tablesExist){
         console.log("✅ Locations table ready");
-    })
+    }
 
 };
 

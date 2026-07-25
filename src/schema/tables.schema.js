@@ -1,6 +1,11 @@
 import db from "../config/db.js";
 
 export const createRestaurantTables = async () => {
+    const [tables] = await db.execute(`SHOW TABLES LIKE 'restaurant_tables'`);
+
+    const tablesExist = tables.length > 0;
+
+
     await db.execute(`
         CREATE TABLE IF NOT EXISTS restaurant_tables (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -12,9 +17,10 @@ export const createRestaurantTables = async () => {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 ON UPDATE CURRENT_TIMESTAMP
         )
-    `).then(()=>{
+    `);
+    if(!tablesExist){
         console.log("✅ Restaurant Tables ready");
-    })
+    }
 
 };
 

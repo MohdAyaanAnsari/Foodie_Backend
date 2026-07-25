@@ -1,6 +1,11 @@
 import db from "../config/db.js";
 
 export const createOrderItemsTable = async () => {
+    const [tables]= await db.execute(`SHOW TABLES LIKE 'order_items'`);
+
+    const tablesExist = tables.length > 0;
+
+
     await db.execute(`
         CREATE TABLE IF NOT EXISTS order_items (
 
@@ -28,9 +33,10 @@ export const createOrderItemsTable = async () => {
                 FOREIGN KEY (dish_id)
                 REFERENCES dishes(id)
         )
-    `).then(()=>{
+    `);
+    if(!tablesExist){
         console.log("✅ Order Items table ready");
-    })
+    }
 
 };
 
