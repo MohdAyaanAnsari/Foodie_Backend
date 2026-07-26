@@ -9,6 +9,7 @@ import DishesRoutes from "./routes/dishes.routes.js";
 import tableRoutes from "./routes/tables.routes.js";
 import locationRoutes from "./routes/locations.routes.js";
 import ordersRoutes from "./routes/orders.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -29,6 +30,7 @@ app.use("/api/dishes/", DishesRoutes);
 app.use("/api/tables/", tableRoutes);
 app.use("/api/locations/", locationRoutes);
 app.use("/api/orders/", ordersRoutes);
+app.use("/api/carts", cartRoutes);
 
 try{
     const connection = await db.getConnection();
