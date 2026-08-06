@@ -44,4 +44,32 @@ src/
 ├── routes/                  # Express route definitions
 └── server.js                 # App entry point
 ```
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ (or [Bun](https://bun.sh))
+- A running MySQL server
+
+### 1. Install dependencies
+
+```bash
+npm install
+# or
+bun install
+```
+
+### 2. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```env
+PORT=3000
+
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=restaurant_db
+```
+
 
