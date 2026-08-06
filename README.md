@@ -23,3 +23,25 @@ A lightweight Express.js REST API powering a restaurant ordering platform — di
 
 > Note: `mongoose` is listed as a dependency but the app currently connects only to MySQL via `mysql2`.
 
+## 📁 Project Structure
+
+```
+src/
+├── config/
+│   └── db.js               # MySQL connection pool
+├── schema/                 # Table definitions & auto-migration
+│   ├── users.schema.js
+│   ├── dishes.schema.js
+│   ├── locations.schema.js
+│   ├── tables.schema.js
+│   ├── orders.schema.js
+│   ├── orderItems.schema.js
+│   ├── cart.schema.js
+│   ├── cartItems.schema.js
+│   └── index.js             # Runs all schema initializers
+├── controllers/             # Request handlers
+├── services/                # Business logic / DB queries
+├── routes/                  # Express route definitions
+└── server.js                 # App entry point
+```
+
