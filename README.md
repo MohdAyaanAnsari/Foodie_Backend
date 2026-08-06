@@ -112,4 +112,17 @@ All endpoints return a consistent JSON shape:
 }
 ```
 
+## 🗃️ Database Schema Overview
+
+- **users** — name, mobile, email, dob, otp
+- **dishes** — name, description, price, discount, category, food_type, cook_time, image_url, availability
+- **locations** — name, distance_km, estimated_delivery_time, delivery_charge, availability
+- **restaurant_tables** — table_number, seats, type (Silver/Gold/VIP), availability
+- **orders** — user, location, total_price, discount, final_price, payment_status, order_status
+- **order_items** — order, dish, quantity, price
+- **carts** — user, status (Active/Checked Out/Abandoned)
+- **cart_items** — cart, dish, quantity, unit_price
+
+Foreign keys enforce referential integrity across orders, carts, and their line items.
+
 
