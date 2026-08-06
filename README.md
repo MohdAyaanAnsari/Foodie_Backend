@@ -12,3 +12,14 @@ A lightweight Express.js REST API powering a restaurant ordering platform — di
 - 👤 **Users** — user accounts with OTP-based verification
 - 🗄️ **Auto-provisioned schema** — MySQL tables are created automatically on server startup
 
+## 🧱 Tech Stack
+
+| Layer     | Technology            |
+|-----------|------------------------|
+| Runtime   | Node.js (ESM) / [Bun](https://bun.sh) |
+| Framework | Express.js             |
+| Database  | MySQL (`mysql2`)       |
+| Config    | `dotenv`                |
+
+> Note: `mongoose` is listed as a dependency but the app currently connects only to MySQL via `mysql2`.
+
