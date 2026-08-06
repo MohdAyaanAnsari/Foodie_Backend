@@ -84,4 +84,32 @@ On startup, the server connects to MySQL and automatically creates any missing t
 
 The API will be available at `http://localhost:<PORT>`.
 
+## 📡 API Reference
+
+Base URL: `http://localhost:<PORT>/api`
+
+| Method | Endpoint                        | Description                    |
+|--------|----------------------------------|---------------------------------|
+| GET    | `/users/AllUsers`                | List all users                 |
+| GET    | `/dishes/AllDishes`              | List all dishes                |
+| GET    | `/dishes/IndianDishes`           | List Indian dishes             |
+| GET    | `/dishes/ItalianDishes`          | List Italian dishes            |
+| GET    | `/dishes/MexicanDishes`          | List Mexican dishes            |
+| GET    | `/dishes/ChineseDishes`          | List Chinese dishes            |
+| GET    | `/dishes/KoreanDishes`           | List Korean dishes             |
+| GET    | `/dishes/JapaneseDishes`         | List Japanese dishes           |
+| GET    | `/tables/AllTables`              | List all restaurant tables     |
+| GET    | `/locations/AllLocations`        | List all delivery locations    |
+| GET    | `/orders/AllORders`              | List all orders                |
+| GET    | `/carts/AllCarts`                | List all carts                 |
+
+All endpoints return a consistent JSON shape:
+
+```json
+{
+  "success": true,
+  "data": []
+}
+```
+
 
