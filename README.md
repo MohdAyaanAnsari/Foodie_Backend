@@ -72,4 +72,16 @@ DB_PASSWORD=your_password
 DB_NAME=restaurant_db
 ```
 
+### 3. Run the server
+
+```bash
+npm run dev
+# or
+npm start
+```
+
+On startup, the server connects to MySQL and automatically creates any missing tables (`users`, `dishes`, `locations`, `restaurant_tables`, `orders`, `order_items`, `carts`, `cart_items`).
+
+The API will be available at `http://localhost:<PORT>`.
+
 
