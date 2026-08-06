@@ -125,4 +125,11 @@ All endpoints return a consistent JSON shape:
 
 Foreign keys enforce referential integrity across orders, carts, and their line items.
 
+## 🛠️ Scripts
+
+| Command       | Description                     |
+|---------------|-----------------------------------|
+| `npm run dev` | Start the server                |
+| `npm start`   | Start the server (same as dev) |
+
 
