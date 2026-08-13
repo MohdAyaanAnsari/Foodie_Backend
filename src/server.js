@@ -11,6 +11,7 @@ import locationRoutes from "./routes/locations.routes.js";
 import ordersRoutes from "./routes/orders.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import catRoutes from "./routes/cat.routes.js";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -33,6 +34,7 @@ app.use("/api/locations", locationRoutes);
 app.use("/api/orders", ordersRoutes);
 app.use("/api/carts", cartRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/categories", catRoutes);
 
 try{
     const connection = await db.getConnection();
