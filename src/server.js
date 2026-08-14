@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 
 import initializeDatabase from "./schema/index.js";
 import db from "./config/db.js";
@@ -20,8 +21,10 @@ const PORT = process.env.PORT;
 const app = express();
 app.use(express.json());
 
-
-
+app.use(cors({
+  origin: process.env.FrontEndUrl,
+  credentials: true,
+}));
 
 app.get("/", (req, res) => {
     res.send("Server is Running");
