@@ -5,37 +5,37 @@ const categoryMeta = {
     description:
       "Authentic Indian cuisine featuring rich curries, aromatic biryanis, and traditional tandoori specialties.",
     image:
-      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=800",
+      "/indian.png",
   },
   Italian: {
     description:
       "Classic Italian dishes including handcrafted pasta, wood-fired pizzas, and creamy risottos.",
     image:
-      "https://images.unsplash.com/photo-1516100882582-96c3a05fe590?q=80&w=800",
+      "/italian.png",
   },
   Mexican: {
     description:
       "Bold Mexican flavors with tacos, burritos, quesadillas, and freshly prepared salsas.",
     image:
-      "https://images.unsplash.com/photo-1565299585323-38174c4a6471?q=80&w=800",
+      "/mexican.png",
   },
   Chinese: {
     description:
       "Traditional Chinese favorites including noodles, fried rice, dumplings, and stir-fried delicacies.",
     image:
-      "https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=800",
+      "/chinese.png",
   },
   Korean: {
     description:
       "Popular Korean dishes featuring BBQ, kimchi, bibimbap, and spicy street-food favorites.",
     image:
-      "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?q=80&w=800",
+      "/korean.png",
   },
   Japanese: {
     description:
       "Fresh Japanese cuisine including sushi, ramen, tempura, and premium seafood specialties.",
     image:
-      "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=800",
+      "/japanese.png",
   },
 };
 
