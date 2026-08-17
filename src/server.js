@@ -1,11 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 
 
@@ -37,7 +32,6 @@ app.get("/", (req, res) => {
     res.send("Server is Running");
 });
 
-app.use("/images", express.static(path.join(__dirname, "..", "public")));
 
 
 app.use("/api/users", UserRoutes);
@@ -61,5 +55,4 @@ await initializeDatabase();
 
 app.listen(PORT, () => {
     console.log("Server is Running on", PORT);
-    console.log("Serving static from:", path.join(__dirname, "public"));
 })
