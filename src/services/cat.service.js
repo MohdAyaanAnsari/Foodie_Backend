@@ -5,37 +5,37 @@ const categoryMeta = {
     description:
       "Authentic Indian cuisine featuring rich curries, aromatic biryanis, and traditional tandoori specialties.",
     image:
-      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/cat_indian.png",
+      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/category/cat_indian.png",
   },
   Italian: {
     description:
       "Classic Italian dishes including handcrafted pasta, wood-fired pizzas, and creamy risottos.",
     image:
-      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/cat_italian.png",
+      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/category/cat_italian.png",
   },
   Mexican: {
     description:
       "Bold Mexican flavors with tacos, burritos, quesadillas, and freshly prepared salsas.",
     image:
-      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/cat_mexicon.png",
+      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/category/cat_mexicon.png",
   },
   Chinese: {
     description:
       "Traditional Chinese favorites including noodles, fried rice, dumplings, and stir-fried delicacies.",
     image:
-      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/cat_chinese.png",
+      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/category/cat_chinese.png",
   },
   Korean: {
     description:
       "Popular Korean dishes featuring BBQ, kimchi, bibimbap, and spicy street-food favorites.",
     image:
-      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/cat_korean.png",
+      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/category/cat_korean.png",
   },
   Japanese: {
     description:
       "Fresh Japanese cuisine including sushi, ramen, tempura, and premium seafood specialties.",
     image:
-      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/cat_japanese.png",
+      "https://raw.githubusercontent.com/MohdAyaanAnsari/Foodie_Photos/refs/heads/main/category/cat_japanese.png",
   },
 };
 
