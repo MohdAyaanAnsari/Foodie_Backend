@@ -149,7 +149,43 @@ const addToCart = async ({ user_id, dish_id, quantity }) => {
     }
 }
 
+
+const getUserCart = async (user_id) => {
+    const connection = await db.getConnection();
+
+    try {
+        const [rows] = await connection.query(
+            `
+            SELECT
+                c.id AS cart_id,
+                ci.id AS cart_item_id,
+                d.id AS dish_id,
+                d.name,
+                d.description,
+                d.image_url,
+                ci.quantity,
+                ci.unit_price,
+                (ci.quantity * ci.unit_price) AS total_price
+            FROM carts c
+            JOIN cart_items ci
+                ON c.id = ci.cart_id
+            JOIN dishes d
+                ON ci.dish_id = d.id
+            WHERE c.user_id = ?
+            AND c.status = 'Active'
+            ORDER BY ci.id DESC
+            `,
+            [user_id]
+        );
+
+        return rows;
+    } finally {
+        connection.release();
+    }
+};
+
 export default{
     getAllCarts,
     addToCart,
+    getUserCart,
 } 
