@@ -12,6 +12,144 @@ const getAllCarts = async () => {
     return AllCarts;
 }
 
+
+const addToCart = async ({ user_id, dish_id, quantity }) => {
+
+    const connection = await db.getConnection();
+
+    try {
+
+        await connection.beginTransaction();
+
+        // Check dish
+        const [dishRows] = await connection.query(
+            `
+            SELECT id, price, is_available
+            FROM dishes
+            WHERE id = ?
+            `,
+            [dish_id]
+        );
+
+        if (dishRows.length === 0) {
+            throw new Error("Dish not found");
+        }
+
+        const dish = dishRows[0];
+
+        if (!dish.is_available) {
+            throw new Error("Dish is currently unavailable");
+        }
+
+        // Find active cart
+        const [cartRows] = await connection.query(
+            `
+            SELECT id
+            FROM carts
+            WHERE user_id = ?
+            AND status = 'Active'
+            LIMIT 1
+            `,
+            [user_id]
+        );
+
+        let cartId;
+
+        if (cartRows.length === 0) {
+
+            const [newCart] = await connection.query(
+                `
+                INSERT INTO carts(user_id)
+                VALUES(?)
+                `,
+                [user_id]
+            );
+
+            cartId = newCart.insertId;
+
+        } else {
+            cartId = cartRows[0].id;
+        }
+
+        // Check existing item
+        const [itemRows] = await connection.query(
+            `
+            SELECT id, quantity
+            FROM cart_items
+            WHERE cart_id = ?
+            AND dish_id = ?
+            `,
+            [cartId, dish_id]
+        );
+
+        if (itemRows.length > 0) {
+
+            await connection.query(
+                `
+                UPDATE cart_items
+                SET quantity = quantity + ?
+                WHERE id = ?
+                `,
+                [quantity, itemRows[0].id]
+            );
+
+        } else {
+
+            await connection.query(
+                `
+                INSERT INTO cart_items
+                (
+                    cart_id,
+                    dish_id,
+                    quantity,
+                    unit_price
+                )
+                VALUES (?, ?, ?, ?)
+                `,
+                [
+                    cartId,
+                    dish_id,
+                    quantity,
+                    dish.price,
+                ]
+            );
+        }
+
+        const [cartItems] = await connection.query(
+            `
+            SELECT
+                ci.id,
+                ci.cart_id,
+                ci.quantity,
+                ci.unit_price,
+                d.id AS dish_id,
+                d.name,
+                d.image_url
+            FROM cart_items ci
+            JOIN dishes d
+                ON ci.dish_id = d.id
+            WHERE ci.cart_id = ?
+            `,
+            [cartId]
+        );
+
+        await connection.commit();
+
+        return cartItems;
+
+    } catch (err) {
+
+        await connection.rollback();
+        throw err;
+
+    } finally {
+
+        connection.release();
+
+    }
+}
+
 export default{
     getAllCarts,
+    addToCart,
 } 
