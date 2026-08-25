@@ -1,9 +1,23 @@
 import express from "express";
-const router = express.Router();
 
 import tableController from "../controllers/tables.controller.js";
 
 
-router.get("/AllTables", tableController.getTables);
+const router = express.Router();
+
+
+// Get all restaurant tables
+router.get(
+    "/",
+    tableController.getTables
+);
+
+
+// Search available tables
+router.post(
+    "/available",
+    tableController.searchAvailableTables
+);
+
 
 export default router;
