@@ -1,36 +1,49 @@
-import authSevices from "../services/auth.service.js";
+import authServices from "../services/auth.service.js";
 
 
-const signup = async(req, res) =>{
-    try{
-        const user = await authSErvices.signUp(req.body);
-        res.status(201).json({
-            success:true,
-            data:user,
-        })
-    }catch(error){
-        res.status(500).json({
-            success:false,
-            message:error.message,
-        })
+const signup = async (req, res) => {
+  try {
+    const user = await authSevices.signUp(req.body);
+
+    return res.status(201).json({
+      success: true,
+      message: "Registration successful",
+      data: user,
+    });
+  } catch (error) {
+    // MySQL Duplicate Entry
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        success: false,
+        message: "Already registered",
+      });
     }
-}
 
-const signupget = async(req, res) =>{
-    try{
-        res.status(200).json({
-            success:true,
-            message:"Signup page accessed"
-        })
-    }catch(error){
-        res.status(500).json({
-            success:false,
-            message:error.message
-        })
-    }
-}
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong",
+    });
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  try {
+    const user = await authServices.verifyOtp(req.body);
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+      data: user,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export default{
     signup,
-    signupget
+    verifyOtp,
 }
