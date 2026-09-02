@@ -1,21 +1,61 @@
 import db from "../config/db.js";
 
-
 const Otp_Generater = async () => {
-    for (let i = 0; i < 6; i++) {
-        const otp = Math.floor(100000 + Math.random() * 900000);
-        return otp;
-    }
-}
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  return otp;
+};
 
-const signUp = async(userData) =>{
-    const {name, mobile, email, dob} = userData;
+const signUp = async (userData) => {
+  const { name, mobile, email, dob } = userData;
 
-    const otp = await Otp_Generater();
-    const [result] = await db.execute("INSERT INTO users (name, mobile, email,dob, otp) VALUES (?,?,?,?,?)", [name, mobile, email, dob, otp]);
-    return {id:result.insertId, name, mobile, email, dob, otp};
-}
+  const otp = await Otp_Generater();
 
+  const [result] = await db.execute(
+    "INSERT INTO users (name, mobile, email, dob, otp) VALUES (?, ?, ?, ?, ?)",
+    [name, mobile, email, dob, otp]
+  );
+
+  // IMPORTANT:
+  // OTP is stored in DB but NOT returned to frontend
+  return {
+    id: result.insertId,
+    name,
+    mobile,
+    email,
+    dob,
+  };
+};
+
+
+const login = async ({ email }) => {
+  // 1. Check if email exists
+  const [rows] = await db.execute(
+    "SELECT id, name, mobile, email, dob FROM users WHERE email = ?",
+    [email]
+  );
+
+  if (rows.length === 0) {
+    throw new Error("Email not registered");
+  }
+
+  // 2. Generate new OTP
+  const otp = await Otp_Generater();
+
+  // 3. Save OTP in database
+  await db.execute(
+    "UPDATE users SET otp = ? WHERE email = ?",
+    [otp, email]
+  );
+
+  // 4. Don't return OTP
+  return {
+    id: rows[0].id,
+    name: rows[0].name,
+    mobile: rows[0].mobile,
+    email: rows[0].email,
+    dob: rows[0].dob,
+  };
+};
 
 const verifyOtp = async ({ email, otp }) => {
   const [rows] = await db.execute(
@@ -31,7 +71,7 @@ const verifyOtp = async ({ email, otp }) => {
     throw new Error("Invalid OTP");
   }
 
-  // Optional: clear OTP after successful verification
+  // Clear OTP after successful verification
   await db.execute(
     "UPDATE users SET otp = NULL WHERE email = ?",
     [email]
@@ -43,8 +83,8 @@ const verifyOtp = async ({ email, otp }) => {
   };
 };
 
-
-export default{
-    signUp,
-    verifyOtp,
-}
+export default {
+  signUp,
+  login,
+  verifyOtp,
+};
