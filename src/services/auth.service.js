@@ -83,8 +83,45 @@ const verifyOtp = async ({ email, otp }) => {
   };
 };
 
+
+const saveToken = async (userId, token) => {
+    await db.execute(
+        "UPDATE users SET token = ? WHERE id = ?",
+        [token, userId]
+    );
+};
+
+const removeToken = async (userId) => {
+    const [result] = await db.execute(
+        "UPDATE users SET token = NULL WHERE id = ?",
+        [userId]
+    );
+
+    // console.log("Logout DB result:", result);
+
+    return result;
+};
+
+
+
+const me = async (userId) => {
+    const [rows] = await db.execute(
+        "SELECT id, name, mobile, email, dob FROM users WHERE id = ?",
+        [userId]
+    );
+
+    if (rows.length === 0) {
+        throw new Error("User not found");
+    }
+
+    return rows[0];
+};
+
 export default {
   signUp,
   login,
   verifyOtp,
+  me,
+  saveToken,
+  removeToken,
 };
