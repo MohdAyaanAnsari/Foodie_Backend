@@ -23,12 +23,13 @@ const getCarts = async (req, res) => {
 
 const addToCart = async (req, res) => {
     try {
-        const { user_id, dish_id, quantity } = req.body;
+        const user_id = req.user.id;
+        const { dish_id, quantity } = req.body;
 
-        if (!user_id || !dish_id) {
+        if (!dish_id) {
             return res.status(400).json({
                 success: false,
-                message: "user_id and dish_id are required",
+                message: "dish_id is required",
             });
         }
 
@@ -57,7 +58,7 @@ const addToCart = async (req, res) => {
 
 const getUserCart = async (req, res) => {
     try {
-        const { user_id } = req.params;
+        const user_id = req.user.id;
 
         const cart = await cartService.getUserCart(user_id);
 
