@@ -1,6 +1,7 @@
 import express from "express";
 
 import tableController from "../controllers/tables.controller.js";
+import authMiddleware from "../middleware/auth.middleware.js";
 
 
 const router = express.Router();
@@ -16,7 +17,7 @@ router.get(
 // Search available tables
 router.post(
     "/available",
-    tableController.searchAvailableTables
+    authMiddleware, tableController.searchAvailableTables
 );
 
 
