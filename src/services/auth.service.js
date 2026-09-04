@@ -1,22 +1,24 @@
 import db from "../config/db.js";
+import { generateOTP, sendOtpEmail } from "../utils/sendOtpEmail.js";
 
-const Otp_Generater = async () => {
-  const otp = Math.floor(100000 + Math.random() * 900000);
-  return otp;
-};
+const OTP_EXPIRY_MINUTES = 5;
 
 const signUp = async (userData) => {
   const { name, mobile, email, dob } = userData;
 
-  const otp = await Otp_Generater();
+  const otp = generateOTP();
+
+  const expiry = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
   const [result] = await db.execute(
-    "INSERT INTO users (name, mobile, email, dob, otp) VALUES (?, ?, ?, ?, ?)",
-    [name, mobile, email, dob, otp]
+    `INSERT INTO users
+    (name, mobile, email, dob, otp, otp_expiry)
+    VALUES (?, ?, ?, ?, ?, ?)`,
+    [name, mobile, email, dob, otp, expiry]
   );
 
-  // IMPORTANT:
-  // OTP is stored in DB but NOT returned to frontend
+  await sendOtpEmail(email, otp);
+
   return {
     id: result.insertId,
     name,
@@ -26,9 +28,7 @@ const signUp = async (userData) => {
   };
 };
 
-
 const login = async ({ email }) => {
-  // 1. Check if email exists
   const [rows] = await db.execute(
     "SELECT id, name, mobile, email, dob FROM users WHERE email = ?",
     [email]
@@ -38,28 +38,33 @@ const login = async ({ email }) => {
     throw new Error("Email not registered");
   }
 
-  // 2. Generate new OTP
-  const otp = await Otp_Generater();
+  const otp = generateOTP();
+  const expiry = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
-  // 3. Save OTP in database
   await db.execute(
-    "UPDATE users SET otp = ? WHERE email = ?",
-    [otp, email]
+    `UPDATE users
+     SET otp = ?, otp_expiry = ?
+     WHERE email = ?`,
+    [otp, expiry, email]
   );
 
-  // 4. Don't return OTP
-  return {
-    id: rows[0].id,
-    name: rows[0].name,
-    mobile: rows[0].mobile,
-    email: rows[0].email,
-    dob: rows[0].dob,
-  };
+  await sendOtpEmail(email, otp);
+
+  return rows[0];
 };
 
 const verifyOtp = async ({ email, otp }) => {
   const [rows] = await db.execute(
-    "SELECT id, otp FROM users WHERE email = ?",
+    `SELECT
+        id,
+        name,
+        mobile,
+        email,
+        dob,
+        otp,
+        otp_expiry
+     FROM users
+     WHERE email = ?`,
     [email]
   );
 
@@ -67,61 +72,67 @@ const verifyOtp = async ({ email, otp }) => {
     throw new Error("User not found");
   }
 
-  if (String(rows[0].otp) !== String(otp)) {
+  const user = rows[0];
+
+  if (String(user.otp) !== String(otp)) {
     throw new Error("Invalid OTP");
   }
 
-  // Clear OTP after successful verification
+  if (!user.otp_expiry || new Date(user.otp_expiry) < new Date()) {
+    throw new Error("OTP has expired");
+  }
+
   await db.execute(
-    "UPDATE users SET otp = NULL WHERE email = ?",
+    `UPDATE users
+     SET otp = NULL,
+         otp_expiry = NULL
+     WHERE email = ?`,
     [email]
   );
 
   return {
-    id: rows[0].id,
-    email,
+    id: user.id,
+    name: user.name,
+    mobile: user.mobile,
+    email: user.email,
+    dob: user.dob,
   };
 };
 
-
 const saveToken = async (userId, token) => {
-    await db.execute(
-        "UPDATE users SET token = ? WHERE id = ?",
-        [token, userId]
-    );
+  await db.execute(
+    "UPDATE users SET token = ? WHERE id = ?",
+    [token, userId]
+  );
 };
 
 const removeToken = async (userId) => {
-    const [result] = await db.execute(
-        "UPDATE users SET token = NULL WHERE id = ?",
-        [userId]
-    );
-
-    // console.log("Logout DB result:", result);
-
-    return result;
+  await db.execute(
+    "UPDATE users SET token = NULL WHERE id = ?",
+    [userId]
+  );
 };
 
-
-
 const me = async (userId) => {
-    const [rows] = await db.execute(
-        "SELECT id, name, mobile, email, dob FROM users WHERE id = ?",
-        [userId]
-    );
+  const [rows] = await db.execute(
+    `SELECT id, name, mobile, email, dob
+     FROM users
+     WHERE id = ?`,
+    [userId]
+  );
 
-    if (rows.length === 0) {
-        throw new Error("User not found");
-    }
+  if (rows.length === 0) {
+    throw new Error("User not found");
+  }
 
-    return rows[0];
+  return rows[0];
 };
 
 export default {
   signUp,
   login,
   verifyOtp,
-  me,
   saveToken,
   removeToken,
+  me,
 };

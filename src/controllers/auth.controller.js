@@ -3,137 +3,125 @@ import generateToken from "../utils/generateToken.js";
 
 const signup = async (req, res) => {
   try {
-    const user = await authServices.signUp(req.body);
+    await authServices.signUp(req.body);
 
     return res.status(201).json({
       success: true,
-      message: "Registration successful. Please verify your OTP.",
-      data: user,
+      message: "OTP has been sent to your email.",
     });
   } catch (error) {
-    // MySQL Duplicate Entry
     if (error.code === "ER_DUP_ENTRY") {
       return res.status(409).json({
         success: false,
-        message: "Already registered",
+        message: "Email is already registered.",
       });
     }
 
     return res.status(500).json({
       success: false,
-      message: error.message || "Something went wrong",
+      message: error.message || "Something went wrong.",
     });
   }
 };
 
-
 const login = async (req, res) => {
   try {
-    const user = await authServices.login(req.body);
+    await authServices.login(req.body);
 
     return res.status(200).json({
       success: true,
-      message: "OTP sent successfully. Please verify your OTP.",
-      data: user,
+      message: "OTP has been sent to your email.",
     });
-
   } catch (error) {
-
     if (error.message === "Email not registered") {
       return res.status(404).json({
         success: false,
-        message: "Email not registered",
+        message: error.message,
       });
     }
 
     return res.status(500).json({
       success: false,
-      message: error.message || "Something went wrong",
+      message: error.message || "Something went wrong.",
     });
   }
 };
 
 const verifyOtp = async (req, res) => {
-    try {
-        const user = await authServices.verifyOtp(req.body);
+  try {
+    const user = await authServices.verifyOtp(req.body);
 
-        // Generate JWT
-        const token = generateToken(user);
+    const token = generateToken(user);
 
-        // Save JWT in database
-        await authServices.saveToken(user.id, token);
+    await authServices.saveToken(user.id, token);
 
-        // Set JWT in cookie
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
-        return res.status(200).json({
-            success: true,
-            message: "OTP verified successfully",
-            data: user,
-        });
-
-    } catch (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.message,
-        });
-    }
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile,
+      },
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
-
 
 const me = async (req, res) => {
-    try {
-        const user = await authServices.me(req.user.id);
+  try {
+    const user = await authServices.me(req.user.id);
 
-        return res.status(200).json({
-            success: true,
-            data: user,
-        });
-    } catch (error) {
-        return res.status(404).json({
-            success: false,
-            message: error.message,
-        });
-    }
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
-
 const logout = async (req, res) => {
-    try {
-        // console.log("Logout user:", req.user);
+  try {
+    await authServices.removeToken(req.user.id);
 
-        await authServices.removeToken(req.user.id);
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
 
-        res.clearCookie("token", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-        });
-
-        return res.status(200).json({
-            success: true,
-            message: "Logged out successfully",
-        });
-
-    } catch (error) {
-        console.error("Logout error:", error);
-
-        return res.status(500).json({
-            success: false,
-            message: error.message || "Logout failed",
-        });
-    }
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Logout failed.",
+    });
+  }
 };
 
 export default {
   signup,
   login,
-  logout,
   verifyOtp,
   me,
+  logout,
 };
