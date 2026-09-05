@@ -3,8 +3,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-
-
 import initializeDatabase from "./schema/index.js";
 import db from "./config/db.js";
 
@@ -18,8 +16,7 @@ import authRoutes from "./routes/auth.routes.js";
 import catRoutes from "./routes/cat.routes.js";
 
 dotenv.config();
-const PORT = process.env.PORT;
-
+const PORT = process.env.PORT || 5000;
 
 const app = express();
 app.use(express.json());
@@ -31,10 +28,8 @@ app.use(cors({
 }));
 
 app.get("/", (req, res) => {
-    res.send("Server is Running");
+  res.send("Server is Running");
 });
-
-
 
 app.use("/api/users", UserRoutes);
 app.use("/api/dishes", DishesRoutes);
@@ -45,16 +40,16 @@ app.use("/api/carts", cartRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", catRoutes);
 
-try{
-    const connection = await db.getConnection();
-    console.log("Database Connected");
-    connection.release();
-}catch(err){
-    console.error("Database Connection Failed", err);
+// Test PostgreSQL connection
+try {
+  const res = await db.query("SELECT NOW()");
+  console.log("Database Connected successfully at:", res.rows[0].now);
+} catch (err) {
+  console.error("Database Connection Failed", err);
 }
 
 await initializeDatabase();
 
 app.listen(PORT, () => {
-    console.log("Server is Running on", PORT);
-})
+  console.log("Server is Running on port", PORT);
+});

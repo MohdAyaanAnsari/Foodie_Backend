@@ -1,43 +1,46 @@
 import db from "../config/db.js";
 
 export const createOrderItemsTable = async () => {
-    const [tables]= await db.execute(`SHOW TABLES LIKE 'order_items'`);
+  const checkTable = await db.query(`
+    SELECT table_name 
+    FROM information_schema.tables 
+    WHERE table_name = 'order_items'
+  `);
 
-    const tablesExist = tables.length > 0;
+  const tablesExist = checkTable.rows.length > 0;
 
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS order_items (
+      id SERIAL PRIMARY KEY,
+      order_id INT NOT NULL,
+      dish_id INT NOT NULL,
+      quantity INT NOT NULL,
+      price DECIMAL(10,2) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    await db.execute(`
-        CREATE TABLE IF NOT EXISTS order_items (
+      CONSTRAINT fk_item_order
+        FOREIGN KEY (order_id)
+        REFERENCES orders(id)
+        ON DELETE CASCADE,
 
-            id INT AUTO_INCREMENT PRIMARY KEY,
+      CONSTRAINT fk_item_dish
+        FOREIGN KEY (dish_id)
+        REFERENCES dishes(id)
+    );
+  `);
 
-            order_id INT NOT NULL,
+  await db.query(`
+    DROP TRIGGER IF EXISTS update_order_items_updated_at ON order_items;
+    CREATE TRIGGER update_order_items_updated_at
+    BEFORE UPDATE ON order_items
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+  `);
 
-            dish_id INT NOT NULL,
-
-            quantity INT NOT NULL,
-
-            price DECIMAL(10,2) NOT NULL,
-
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                ON UPDATE CURRENT_TIMESTAMP,
-
-            CONSTRAINT fk_item_order
-                FOREIGN KEY (order_id)
-                REFERENCES orders(id)
-                ON DELETE CASCADE,
-
-            CONSTRAINT fk_item_dish
-                FOREIGN KEY (dish_id)
-                REFERENCES dishes(id)
-        )
-    `);
-    if(!tablesExist){
-        console.log("✅ Order Items table ready");
-    }
-
+  if (!tablesExist) {
+    console.log("✅ Order Items table ready");
+  }
 };
 
 export default createOrderItemsTable;

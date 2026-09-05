@@ -1,36 +1,49 @@
 import db from "../config/db.js";
 
 export const createCartsTable = async () => {
-    const [tables] = await db.execute(`SHOW TABLES LIKE 'carts'`);
+  const checkTable = await db.query(`
+    SELECT table_name 
+    FROM information_schema.tables 
+    WHERE table_name = 'carts'
+  `);
 
-    const tablesExist = tables.length > 0;
+  const tablesExist = checkTable.rows.length > 0;
 
-    await db.execute(`
-        CREATE TABLE IF NOT EXISTS carts (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+  await db.query(`
+    DO $$ 
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'cart_status_enum') THEN
+        CREATE TYPE cart_status_enum AS ENUM ('Active', 'Checked Out', 'Abandoned');
+      END IF;
+    END $$;
+  `);
 
-            user_id INT NOT NULL,
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS carts (
+      id SERIAL PRIMARY KEY,
+      user_id INT NOT NULL,
+      status cart_status_enum DEFAULT 'Active',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-            status ENUM(
-                'Active',
-                'Checked Out',
-                'Abandoned'
-            ) DEFAULT 'Active',
+      CONSTRAINT fk_cart_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+    );
+  `);
 
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                ON UPDATE CURRENT_TIMESTAMP,
+  await db.query(`
+    DROP TRIGGER IF EXISTS update_carts_updated_at ON carts;
+    CREATE TRIGGER update_carts_updated_at
+    BEFORE UPDATE ON carts
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+  `);
 
-            CONSTRAINT fk_cart_user
-                FOREIGN KEY (user_id)
-                REFERENCES users(id)
-                ON DELETE CASCADE
-        )
-    `);
-
-    if (!tablesExist) {
-        console.log("✅ Carts table ready");
-    }
+  if (!tablesExist) {
+    console.log("✅ Carts table ready");
+  }
 };
 
 export default createCartsTable;

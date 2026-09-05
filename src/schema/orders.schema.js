@@ -1,53 +1,62 @@
 import db from "../config/db.js";
 
 export const createOrdersTable = async () => {
-    const [tables] = await db.execute(`SHOW TABLES LIKE 'orders'`);
+  const checkTable = await db.query(`
+    SELECT table_name 
+    FROM information_schema.tables 
+    WHERE table_name = 'orders'
+  `);
 
-    const tablesExist = tables.length > 0;
+  const tablesExist = checkTable.rows.length > 0;
 
-    await db.execute(`
-        CREATE TABLE IF NOT EXISTS orders (
-            id INT AUTO_INCREMENT PRIMARY KEY,
+  await db.query(`
+    DO $$ 
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_status_enum') THEN
+        CREATE TYPE payment_status_enum AS ENUM ('Pending', 'Paid', 'Failed');
+      END IF;
 
-            user_id INT NOT NULL,
-            location_id INT NOT NULL,
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status_enum') THEN
+        CREATE TYPE order_status_enum AS ENUM ('Pending', 'Preparing', 'Out For Delivery', 'Delivered', 'Cancelled');
+      END IF;
+    END $$;
+  `);
 
-            total_price DECIMAL(10,2) NOT NULL,
-            discount DECIMAL(10,2) DEFAULT 0,
-            final_price DECIMAL(10,2) NOT NULL,
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id SERIAL PRIMARY KEY,
+      user_id INT NOT NULL,
+      location_id INT NOT NULL,
+      total_price DECIMAL(10,2) NOT NULL,
+      discount DECIMAL(10,2) DEFAULT 0,
+      final_price DECIMAL(10,2) NOT NULL,
+      payment_status payment_status_enum DEFAULT 'Pending',
+      order_status order_status_enum DEFAULT 'Pending',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-            payment_status ENUM(
-                'Pending',
-                'Paid',
-                'Failed'
-            ) DEFAULT 'Pending',
+      CONSTRAINT fk_order_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
 
-            order_status ENUM(
-                'Pending',
-                'Preparing',
-                'Out For Delivery',
-                'Delivered',
-                'Cancelled'
-            ) DEFAULT 'Pending',
+      CONSTRAINT fk_order_location
+        FOREIGN KEY (location_id)
+        REFERENCES locations(id)
+    );
+  `);
 
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                ON UPDATE CURRENT_TIMESTAMP,
+  await db.query(`
+    DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
+    CREATE TRIGGER update_orders_updated_at
+    BEFORE UPDATE ON orders
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+  `);
 
-            CONSTRAINT fk_order_user
-                FOREIGN KEY (user_id)
-                REFERENCES users(id)
-                ON DELETE CASCADE,
-
-            CONSTRAINT fk_order_location
-                FOREIGN KEY (location_id)
-                REFERENCES locations(id)
-        )
-    `);
-    if(!tablesExist){
-        console.log("✅ Orders table ready");
-    }
-
+  if (!tablesExist) {
+    console.log("✅ Orders table ready");
+  }
 };
 
 export default createOrdersTable;
