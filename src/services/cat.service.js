@@ -40,26 +40,30 @@ const categoryMeta = {
 };
 
 const getDishesCategories = async () => {
-  const [rows] = await db.execute(`
+  const { rows } = await db.query(`
     SELECT
       category,
-      COUNT(*) AS itemCount
+      COUNT(*) AS "itemCount"
     FROM dishes
     GROUP BY category
     ORDER BY category;
   `);
 
-  return rows.map((row, index) => ({
-    id: index + 1,
-    name: row.category,
-    itemCount: `${row.itemCount} Items`,
-    description:
-      categoryMeta[row.category]?.description ||
-      "Explore our delicious selection of dishes.",
-    image:
-      categoryMeta[row.category]?.image ||
-      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800",
-  }));
+  return rows.map((row, index) => {
+    const itemCount = parseInt(row.itemCount, 10) || 0;
+
+    return {
+      id: index + 1,
+      name: row.category,
+      itemCount: `${itemCount} Items`,
+      description:
+        categoryMeta[row.category]?.description ||
+        "Explore our delicious selection of dishes.",
+      image:
+        categoryMeta[row.category]?.image ||
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800",
+    };
+  });
 };
 
 export default {

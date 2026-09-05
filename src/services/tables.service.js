@@ -18,19 +18,18 @@ const attachImage = (tables) =>
  * This is mainly useful for admin/internal purposes.
  */
 const getAllTables = async () => {
-    const [tables] = await db.execute(`
-        SELECT
-            id,
-            table_number,
-            seats,
-            type
-        FROM restaurant_tables
-        ORDER BY table_number ASC
-    `);
+  const { rows: tables } = await db.query(`
+    SELECT
+      id,
+      table_number,
+      seats,
+      type
+    FROM restaurant_tables
+    ORDER BY table_number ASC
+  `);
 
-    return tables;
+  return tables;
 };
-
 
 /**
  * Find tables that are available for a particular
@@ -55,30 +54,24 @@ const findAvailableTables = async ({
       rt.type
     FROM restaurant_tables rt
     WHERE
-      rt.seats >= ?
-      AND rt.type = ?
+      rt.seats >= $1
+      AND rt.type = $2
       AND NOT EXISTS (
         SELECT 1
         FROM table_reservations tr
         WHERE
           tr.table_id = rt.id
-          AND tr.reservation_date = ?
+          AND tr.reservation_date = $3
           AND tr.status IN ('Pending', 'Confirmed')
-          AND ? < ADDTIME(
-            tr.reservation_time,
-            SEC_TO_TIME(tr.duration_minutes * 60)
-          )
-          AND ADDTIME(
-            ?,
-            SEC_TO_TIME(120 * 60)
-          ) > tr.reservation_time
+          AND $4::time < (tr.reservation_time + (tr.duration_minutes || ' minutes')::interval)
+          AND ($5::time + INTERVAL '120 minutes') > tr.reservation_time
       )
     ORDER BY
       rt.seats ASC,
       rt.table_number ASC
   `;
 
-  const [tables] = await db.execute(sql, [
+  const { rows: tables } = await db.query(sql, [
     guests,
     tableType,
     reservationDate,
@@ -89,9 +82,7 @@ const findAvailableTables = async ({
   return attachImage(tables);
 };
 
-
-
 export default {
-    getAllTables,
-    findAvailableTables
+  getAllTables,
+  findAvailableTables,
 };

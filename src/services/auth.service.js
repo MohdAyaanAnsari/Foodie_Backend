@@ -7,20 +7,19 @@ const signUp = async (userData) => {
   const { name, mobile, email, dob } = userData;
 
   const otp = generateOTP();
-
   const expiry = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
-  const [result] = await db.execute(
-    `INSERT INTO users
-    (name, mobile, email, dob, otp, otp_expiry)
-    VALUES (?, ?, ?, ?, ?, ?)`,
+  const { rows } = await db.query(
+    `INSERT INTO users (name, mobile, email, dob, otp, otp_expiry)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     RETURNING id`,
     [name, mobile, email, dob, otp, expiry]
   );
 
   await sendOtpEmail(email, otp);
 
   return {
-    id: result.insertId,
+    id: rows[0].id,
     name,
     mobile,
     email,
@@ -29,8 +28,8 @@ const signUp = async (userData) => {
 };
 
 const login = async ({ email }) => {
-  const [rows] = await db.execute(
-    "SELECT id, name, mobile, email, dob FROM users WHERE email = ?",
+  const { rows } = await db.query(
+    "SELECT id, name, mobile, email, dob FROM users WHERE email = $1",
     [email]
   );
 
@@ -41,10 +40,10 @@ const login = async ({ email }) => {
   const otp = generateOTP();
   const expiry = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
-  await db.execute(
+  await db.query(
     `UPDATE users
-     SET otp = ?, otp_expiry = ?
-     WHERE email = ?`,
+     SET otp = $1, otp_expiry = $2
+     WHERE email = $3`,
     [otp, expiry, email]
   );
 
@@ -54,7 +53,7 @@ const login = async ({ email }) => {
 };
 
 const verifyOtp = async ({ email, otp }) => {
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT
         id,
         name,
@@ -64,7 +63,7 @@ const verifyOtp = async ({ email, otp }) => {
         otp,
         otp_expiry
      FROM users
-     WHERE email = ?`,
+     WHERE email = $1`,
     [email]
   );
 
@@ -82,11 +81,11 @@ const verifyOtp = async ({ email, otp }) => {
     throw new Error("OTP has expired");
   }
 
-  await db.execute(
+  await db.query(
     `UPDATE users
      SET otp = NULL,
          otp_expiry = NULL
-     WHERE email = ?`,
+     WHERE email = $1`,
     [email]
   );
 
@@ -100,24 +99,24 @@ const verifyOtp = async ({ email, otp }) => {
 };
 
 const saveToken = async (userId, token) => {
-  await db.execute(
-    "UPDATE users SET token = ? WHERE id = ?",
+  await db.query(
+    "UPDATE users SET token = $1 WHERE id = $2",
     [token, userId]
   );
 };
 
 const removeToken = async (userId) => {
-  await db.execute(
-    "UPDATE users SET token = NULL WHERE id = ?",
+  await db.query(
+    "UPDATE users SET token = NULL WHERE id = $1",
     [userId]
   );
 };
 
 const me = async (userId) => {
-  const [rows] = await db.execute(
+  const { rows } = await db.query(
     `SELECT id, name, mobile, email, dob
      FROM users
-     WHERE id = ?`,
+     WHERE id = $1`,
     [userId]
   );
 
