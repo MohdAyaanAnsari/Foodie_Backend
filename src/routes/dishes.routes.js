@@ -5,11 +5,11 @@ const router = express.Router();
 
 
 router.get("/AllDishes", authMiddleware, dishesController.getDishes);
-router.get("/IndianDishes", authMiddleware, dishesController.getIndianDishes);
-router.get("/ItalianDishes", authMiddleware, dishesController.getItalianDishes);
-router.get("/MexicanDishes", authMiddleware, dishesController.getMexicanDishes);
-router.get("/ChineseDishes", authMiddleware, dishesController.getChineseDishes);
-router.get("/KoreanDishes", authMiddleware, dishesController.getKoreanDishes);
-router.get("/JapaneseDishes", authMiddleware, dishesController.getJapaneseDishes);
+router.get("/IndianDishes",  dishesController.getIndianDishes);
+router.get("/ItalianDishes",  dishesController.getItalianDishes);
+router.get("/MexicanDishes",  dishesController.getMexicanDishes);
+router.get("/ChineseDishes", dishesController.getChineseDishes);
+router.get("/KoreanDishes", dishesController.getKoreanDishes);
+router.get("/JapaneseDishes",  dishesController.getJapaneseDishes);
 
 export default router;
